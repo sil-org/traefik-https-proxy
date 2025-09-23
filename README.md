@@ -16,7 +16,7 @@ Create A records in your DNS  provider for the local development domains you wan
 a TXT record on your DNS provider for Let's Encrypt to verify before it receives your certificate. 
 
 ## Usage
-In your `docker-compose.yml`, include a service like:
+In your `compose.yaml`, include a service like:
 
 ```yaml
   proxy:
@@ -50,7 +50,7 @@ Optional env vars:
 - `FRONTEND3_DOMAIN` - The domain name that should be routed to `BACKEND3_URL`, example: `app3.domain.com`
 
 ## Overriding `traefik.toml`
-You'll notice in the `docker-compose.yml` example above a commented out volume for `traefik.toml`. If you 
+You'll notice in the `compose.yaml` example above a commented out volume for `traefik.toml`. If you 
 don't want to use the simplified template that comes with this container and want to customize it, just provide 
 your own config file and volume it in. The entrypoint script looks for specific placeholders and should not 
 modify your own provided config. 
