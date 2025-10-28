@@ -20,7 +20,7 @@ In your `compose.yaml`, include a service like:
 
 ```yaml
   proxy:
-    image: silintl/traefik-https-proxy
+    image: ghcr.io/sil-org/traefik-https-proxy
     ports:
       - "80:80"
       - "443:443"

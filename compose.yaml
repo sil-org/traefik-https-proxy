@@ -11,21 +11,21 @@ services:
       - ./local.env
 
   dev1:
-    image: silintl/php8:8.3
+    image: ghcr.io/sil-org/php8:8.3
     ports:
       - "80"
     volumes:
       - ./index.php:/data/frontend/web/index.php
 
   dev2:
-    image: silintl/php8:8.3
+    image: ghcr.io/sil-org/php8:8.3
     ports:
       - "80"
     volumes:
       - ./index.php:/data/frontend/web/index.php
 
   dev3:
-    image: silintl/php8:8.3
+    image: ghcr.io/sil-org/php8:8.3
     ports:
       - "80"
     volumes:
