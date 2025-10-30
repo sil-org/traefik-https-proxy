@@ -133,6 +133,8 @@ func BuildReplacementsFromEnv() ([]Replacement, error) {
 			}
 		case "SANS":
 			value = `"` + strings.ReplaceAll(value, ",", `", "`) + `"`
+		default:
+			// Do nothing
 		}
 
 		configReplacements = append(configReplacements, Replacement{
