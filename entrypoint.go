@@ -123,7 +123,6 @@ func BuildReplacementsFromEnv() ([]Replacement, error) {
 			}
 
 			value = envvar.Default
-			continue
 		}
 
 		switch envvar.Name {
