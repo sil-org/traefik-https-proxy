@@ -46,9 +46,8 @@ func TestBuildReplacementsFromEnv(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	replacementsCount := len(replacements)
-	if replacementsCount != 6 {
-		t.Fatal("Replacements did not have enough entries, only found", replacementsCount, "but expected 6")
+	if want, got := 7, len(replacements); want != got {
+		t.Fatal("Replacements did not have enough entries: found", got, "but expected", want)
 	}
 }
 

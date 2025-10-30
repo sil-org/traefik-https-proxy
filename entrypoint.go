@@ -122,6 +122,10 @@ func BuildReplacementsFromEnv() ([]Replacement, error) {
 				return configReplacements, fmt.Errorf("missing required env var: %s. Description: %s", envvar.Name, envvar.Desc)
 			}
 
+			if envvar.Default == "" {
+				continue
+			}
+
 			value = envvar.Default
 		}
 

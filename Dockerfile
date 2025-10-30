@@ -1,5 +1,6 @@
-FROM golang:1-alpine3.7 as builder
+FROM golang:1-alpine3.22 AS builder
 WORKDIR /go/src/entrypoint
+COPY ./go.mod /go/src/entrypoint
 COPY ./entrypoint.go /go/src/entrypoint/
 RUN go build
 
