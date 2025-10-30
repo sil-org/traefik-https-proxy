@@ -1,5 +1,6 @@
 FROM golang:1-alpine3.7
 WORKDIR /go/src/entrypoint
+COPY ./go.mod /go/src/entrypoint
 COPY ./entrypoint.go /go/src/entrypoint/
 COPY ./entrypoint_test.go /go/src/entrypoint/
 COPY ./traefik.toml /go/src/entrypoint/
