@@ -16,11 +16,11 @@ example val
 another green	
 `
 	replacements := []Replacement{
-		Replacement{
+		{
 			Key:   "TEST",
 			Value: "val",
 		},
-		Replacement{
+		{
 			Key:   "FIELD",
 			Value: "green",
 		},
@@ -28,8 +28,7 @@ another green
 	results := UpdateConfigContent([]byte(original), replacements)
 
 	if string(results) != expected {
-		t.Error("Results to not match expected. Results:", results)
-		t.FailNow()
+		t.Fatal("Results to not match expected. Results:", results)
 	}
 }
 
@@ -37,30 +36,26 @@ func TestBuildReplacementsFromEnv(t *testing.T) {
 	// Test failure for required env var
 	_, err := BuildReplacementsFromEnv()
 	if err == nil {
-		t.Error("BuildReplacementsFromEnv should have failed because no env vars have been set")
-		t.FailNow()
+		t.Fatal("BuildReplacementsFromEnv should have failed because no env vars have been set")
 	}
 
 	setRequiredEnvVars()
 
 	replacements, err := BuildReplacementsFromEnv()
 	if err != nil {
-		t.Error(err)
-		t.FailNow()
+		t.Fatal(err)
 	}
 
 	replacementsCount := len(replacements)
 	if replacementsCount != 6 {
-		t.Error("Replacements did not have enough entries, only found", replacementsCount, "but expected 6")
-		t.FailNow()
+		t.Fatal("Replacements did not have enough entries, only found", replacementsCount, "but expected 6")
 	}
 }
 
 func TestReadUpdateWrite(t *testing.T) {
 	dir, err := os.Getwd()
 	if err != nil {
-		t.Error("Unable to get current working directory for TestReadUpdateWrite")
-		t.FailNow()
+		t.Fatal("Unable to get current working directory for TestReadUpdateWrite")
 	}
 	readFile := dir + "/traefik.toml"
 	writeFile := dir + "/traefik_test.toml"
@@ -72,8 +67,7 @@ func TestReadUpdateWrite(t *testing.T) {
 
 	configToml, err := ReadTraefikToml(readFile)
 	if err != nil {
-		t.Error(err)
-		t.FailNow()
+		t.Fatal(err)
 	}
 
 	// Make sure placeholders for env vars exist
@@ -82,8 +76,7 @@ func TestReadUpdateWrite(t *testing.T) {
 		search := regexp.MustCompile(envvar.Name)
 		found := search.Find(configToml)
 		if found == nil {
-			t.Error("Did not find key in configToml template for env var", envvar.Name)
-			t.FailNow()
+			t.Fatal("Did not find key in configToml template for env var", envvar.Name)
 		}
 	}
 
@@ -91,8 +84,7 @@ func TestReadUpdateWrite(t *testing.T) {
 	setRequiredEnvVars()
 	replacements, err := BuildReplacementsFromEnv()
 	if err != nil {
-		t.Error(err)
-		t.FailNow()
+		t.Fatal(err)
 	}
 	configToml = UpdateConfigContent(configToml, replacements)
 
@@ -102,8 +94,7 @@ func TestReadUpdateWrite(t *testing.T) {
 			search := regexp.MustCompile(envvar.Name)
 			found := search.Find(configToml)
 			if found != nil {
-				t.Error("Uh oh, placeholder for required env var still present after update for env var:", envvar.Name)
-				t.FailNow()
+				t.Fatal("Uh oh, placeholder for required env var still present after update for env var:", envvar.Name)
 			}
 		}
 	}
@@ -111,10 +102,8 @@ func TestReadUpdateWrite(t *testing.T) {
 	// Write out test file for manual reivew
 	err = WriteTraefikToml(writeFile, configToml)
 	if err != nil {
-		t.Error(err)
-		t.FailNow()
+		t.Fatal(err)
 	}
-
 }
 
 func setRequiredEnvVars() {

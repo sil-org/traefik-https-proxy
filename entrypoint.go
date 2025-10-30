@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"regexp"
@@ -26,14 +26,12 @@ type EnvVar struct {
 }
 
 func main() {
-
 	var configFile string
 	flag.StringVar(&configFile, "c", "/etc/traefik/traefik.toml", "Traefik config file to use, default: /etc/traefik/traefik.toml")
 	flag.Parse()
 
 	if _, err := os.Stat(configFile); err != nil {
-		fmt.Println("Config file", configFile, "not found")
-		os.Exit(1)
+		log.Fatalln("Config file not found:", configFile)
 	}
 
 	if len(os.Args) <= 1 {
@@ -52,7 +50,6 @@ func main() {
 	handleError(err)
 
 	runCmd()
-	os.Exit(0)
 }
 
 // Run CMD specified in Dockerfile or runtime and send output to stdout
@@ -79,16 +76,15 @@ func runCmd() {
 
 func handleError(err error) {
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatalln(err)
 	}
 }
 
 // ReadTraefikToml reads the Traefik config file from filesystem and returns as byte array
 func ReadTraefikToml(filename string) ([]byte, error) {
-	file, err := ioutil.ReadFile(filename)
+	file, err := os.ReadFile(filename)
 	if err != nil {
-		return []byte{}, fmt.Errorf("Unable to read config file at %s", filename)
+		return []byte{}, fmt.Errorf("unable to read config file at %s", filename)
 	}
 
 	return file, nil
@@ -96,12 +92,7 @@ func ReadTraefikToml(filename string) ([]byte, error) {
 
 // WriteTraefikToml writes updated Traefix config to filesystem
 func WriteTraefikToml(filename string, contents []byte) error {
-	err := ioutil.WriteFile(filename, contents, 0644)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return os.WriteFile(filename, contents, 0644)
 }
 
 // UpdateConfigContent replaces placeholders with values from environment variables
@@ -116,38 +107,38 @@ func UpdateConfigContent(config []byte, replacements []Replacement) []byte {
 
 // BuildReplacementsFromEnv Build []Replacement from env vars
 func BuildReplacementsFromEnv() ([]Replacement, error) {
+	letsEncryptURLs := map[string]string{
+		"staging":    "https://acme-staging.api.letsencrypt.org/directory",
+		"production": "https://acme-v01.api.letsencrypt.org/directory",
+	}
 
 	var configReplacements []Replacement
 
 	envVars := GetEnvVarModels()
 	for _, envvar := range envVars {
 		value := os.Getenv(envvar.Name)
-		if value == "" && envvar.Required {
-			return configReplacements, fmt.Errorf("Missing required env var: %s. Description: %s", envvar.Name, envvar.Desc)
+		if value == "" {
+			if envvar.Required {
+				return configReplacements, fmt.Errorf("missing required env var: %s. Description: %s", envvar.Name, envvar.Desc)
+			}
+
+			value = envvar.Default
+			continue
 		}
 
-		if value != "" {
-			if envvar.Name == "LETS_ENCRYPT_CA" {
-				if value == "staging" {
-					value = "https://acme-staging.api.letsencrypt.org/directory"
-				} else if value == "production" {
-					value = "https://acme-v01.api.letsencrypt.org/directory"
-				}
-			} else if envvar.Name == "SANS" {
-				sans := strings.Split(value, ",")
-				value = ""
-				for _, san := range sans {
-					value += "\"" + san + "\", "
-				}
-				value = strings.TrimRight(value, ", ")
+		switch envvar.Name {
+		case "LETS_ENCRYPT_CA":
+			if v, ok := letsEncryptURLs[value]; ok {
+				value = v
 			}
-			configReplacements = append(configReplacements, Replacement{
-				Key:   envvar.Name,
-				Value: value,
-			})
-		} else if value == "" && !envvar.Required {
-			value = envvar.Default
+		case "SANS":
+			value = `"` + strings.ReplaceAll(value, ",", `", "`) + `"`
 		}
+
+		configReplacements = append(configReplacements, Replacement{
+			Key:   envvar.Name,
+			Value: value,
+		})
 	}
 
 	return configReplacements, nil
