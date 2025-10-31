@@ -35,7 +35,7 @@ Copy the `local.env.example` file to `local.env` and update it with appropriate 
 for environment configuration helps prevent committing it to version control with credentials in it. 
 
 Required env vars:
-- `DNS_PROVIDER` - A valid value from https://docs.traefik.io/https/acme/#providers. Each provider will also required additional env vars for authentication. For example `cloudflare` requires `CLOUDFLARE_EMAIL` and `CLOUDFLARE_API_KEY`.
+- `DNS_PROVIDER` - A valid value from https://docs.traefik.io/https/acme/#providers. Each provider will also required additional env vars for authentication. For example `cloudflare` requires either a `CLOUDFLARE_EMAIL` and `CLOUDFLARE_API_KEY` or just a `CLOUDFLARE_DNS_API_TOKEN`.
 - `LETS_ENCRYPT_EMAIL` - An email address to use with Lets Encrypt, does not need to be previously "registered"
 - `LETS_ENCRYPT_CA` - Either `staging` or `production`. Traefik does not appear to respect the staging caServer at the moment though.
 - `TLD` - Used as the main domain on Lets Encrypt certificate, something like `domain.com`
